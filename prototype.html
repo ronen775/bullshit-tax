@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bullshit Tax - NoExcuse Visual Guide</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Heebo:wght@300;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --surface: #111;
+            --text: #fff;
+            --accent: #FF3B30;
+            --success: #34C759;
+            --gray: #666;
+            --font-main: 'Outfit', 'Heebo', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* App Container (Phone Mockup) */
+        #app-container {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border: 8px solid #222;
+            border-radius: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(255, 59, 48, 0.1);
+        }
+
+        .screen {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            padding: 40px 24px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .screen.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 32px;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        p {
+            font-size: 18px;
+            color: var(--gray);
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .highlight {
+            color: var(--accent);
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--text);
+            color: #000;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            margin-top: auto;
+        }
+
+        .btn:hover {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 2px solid #333;
+        }
+
+        /* Components */
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .checkbox-item {
+            background: var(--surface);
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #222;
+        }
+
+        .checkbox-item.checked {
+            border-color: var(--accent);
+        }
+
+        .slider-container {
+            width: 100%;
+            margin: 40px 0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+            background: #222;
+            height: 8px;
+            border-radius: 4px;
+        }
+
+        .option-grid {
+            display: grid;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            background: var(--surface);
+            padding: 16px;
+            border: 1px solid #222;
+            border-radius: 12px;
+            color: var(--text);
+            text-align: right;
+            cursor: pointer;
+        }
+
+        /* Loading Animation */
+        .loading-ring {
+            width: 80px;
+            height: 80px;
+            border: 4px solid #111;
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: auto;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Verdict Screen */
+        .verdict-box {
+            background: #111;
+            border: 2px solid var(--accent);
+            padding: 24px;
+            border-radius: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .verdict-tag {
+            font-size: 40px;
+            font-weight: 900;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .roast-text {
+            font-style: italic;
+            color: #eee;
+            margin-bottom: 15px;
+        }
+
+        .fine-tag {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* Navigation helper */
+        #nav-guide {
+            position: absolute;
+            bottom: -60px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: var(--gray);
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app-container">
+        <!-- Screen 1: Intro -->
+        <div class="screen active" id="screen-1">
+            <h1 style="margin-top: 60px;">זאת לא אפליקציה מוטיבציונית.</h1>
+            <p>אין פה עידוד. אין השראה.<br><span class="highlight">יש פה אמת.</span></p>
+            <div class="btn" onclick="nextScreen(2)">הבנתי. תמשיך</div>
+        </div>
+
+        <!-- Screen 2: Consent -->
+        <div class="screen" id="screen-2">
+            <h1>אם לא תעשה – תשלם.</h1>
+            <p>הסכם התנהגות:</p>
+            <div class="checkbox-group">
+                <div class="checkbox-item checked">⬜ אני מבין שאשלם כסף אמיתי</div>
+                <div class="checkbox-item">⬜ אני מבין שאקבל Roast כואב</div>
+                <div class="checkbox-item">⬜ אני מבין שאף אחד לא מרחם עליי</div>
+            </div>
+            <div class="btn" onclick="nextScreen(3)">אישור – אני מוכן</div>
+        </div>
+
+        <!-- Screen 3: Cruelty Level -->
+        <div class="screen" id="screen-3">
+            <h1>כמה אכזרי להיות?</h1>
+            <p>בחר את רמת השיפוט:</p>
+            <div class="slider-container">
+                <input type="range" min="1" max="3" step="1" value="2">
+                <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 14px;">
+                    <span>רגוע 😐</span>
+                    <span>ישיר 😬</span>
+                    <span>אכזרי 😈</span>
+                </div>
+            </div>
+            <div class="btn" onclick="nextScreen(4)">המשך</div>
+        </div>
+
+        <!-- Screen 4: Fine Target -->
+        <div class="screen" id="screen-4">
+            <h1>לאן ילך הכסף?</h1>
+            <p>אל תחרטט, תבחר יעד:</p>
+            <div class="option-grid">
+                <div class="option-btn">תרומה למשהו שאני לא אוהב</div>
+                <div class="option-btn">העברה לחבר (הכי כואב)</div>
+                <div class="option-btn">קופת הבושה שלי</div>
+            </div>
+            <div class="btn" onclick="nextScreen(5)">הגדר יעד</div>
+        </div>
+
+        <!-- Screen 5: Warning -->
+        <div class="screen" id="screen-5">
+            <div style="margin: auto; text-align: center;">
+                <h1 class="highlight">אזהרה אחרונה.</h1>
+                <p>אם חיפשת מישהו שיגיד לך "הכל בסדר" – סגור את האפליקציה עכשיו.</p>
+            </div>
+            <div class="btn" onclick="nextScreen(6)">יאללה, בוא נתחיל</div>
+        </div>
+
+        <!-- Screen 6: First Commitment -->
+        <div class="screen" id="screen-6">
+            <h1>התחייבות ראשונה.</h1>
+            <p>משהו קטן. בלי מקום לתירוצים.</p>
+            <div class="checkbox-group" style="margin-top: 0;">
+                <div style="color: var(--gray); font-size: 14px; margin-bottom: 4px;">משימה</div>
+                <div class="checkbox-item" style="border-style: dashed;">לסיים את המצגת (15 דק')</div>
+            </div>
+            <div class="btn" onclick="nextScreen(7)">התחייבתי</div>
+        </div>
+
+        <!-- Screen 7: Failure Flow -->
+        <div class="screen" id="screen-7">
+            <h1>לא עשית?</h1>
+            <p>זמן להסביר את עצמך ל-AI.</p>
+            <div class="option-grid">
+                <div class="option-btn" onclick="submitExcuse('לא היה לי כוח')">לא היה לי כוח</div>
+                <div class="option-btn" onclick="submitExcuse('פחדתי')">פחדתי</div>
+                <div class="option-btn" onclick="submitExcuse('לא היה זמן')">לא היה זמן (הקלאסי)</div>
+                <div class="option-btn" style="border: 1px dashed #444;" onclick="submitExcuse('תירוץ מותאם אישית')">
+                    כתוב תירוץ בעצמך...</div>
+            </div>
+            <div class="btn btn-outline" onclick="nextScreen(6)">בעצם ביצעתי!</div>
+        </div>
+
+        <!-- Screen 8: AI Judging -->
+        <div class="screen" id="screen-8">
+            <div style="margin: auto; text-align: center;">
+                <div class="loading-ring"></div>
+                <h1 style="margin-top: 20px; font-size: 24px;">AI שופט את התירוץ...</h1>
+                <p>מנתח היסטוריה, כנות ורמת הפתטיות.</p>
+            </div>
+        </div>
+
+        <!-- Screen 9: AI Verdict -->
+        <div class="screen" id="screen-9">
+            <h1>פסק הדין.</h1>
+            <div class="verdict-box">
+                <div class="verdict-tag">BULLSHIT</div>
+                <div class="roast-text">"מעניין איך תמיד אין זמן לדברים שחשובים לך. אבל לסטורי היה זמן, אה?"</div>
+                <div style="color: var(--gray); font-size: 14px; margin-bottom: 10px;">סיבה: חוסר עקביות בזמנים.</div>
+                <div class="fine-tag">קנס: ₪12</div>
+            </div>
+            <div class="btn" onclick="nextScreen(1)">קיבלתי. (חזרה להתחלה)</div>
+        </div>
+
+        <div id="nav-guide">Interactive Blueprint for Developers</div>
+    </div>
+
+    <script>
+        let currentTask = "לסיים את המצגת";
+        let currentMinutes = 15;
+
+        // מוח AI מקומי (עוקף שרת)
+        const localAIJudge = (excuse) => {
+            const bullshitKeywords = ["זמן", "עייף", "מחר", "כלב", "אינטרנט", "כוח"];
+            // אם התירוץ קצר מדי או מכיל מילות מפתח - זה בולשיט
+            const isBullshit = excuse.length < 4 || bullshitKeywords.some(w => excuse.includes(w));
+
+            if (!isBullshit && (excuse.includes("פחד") || excuse.includes("אמת"))) {
+                return {
+                    verdict: "LEGIT",
+                    roast: "לפחות אתה כנה. זה נדיר פה.",
+                    fine: "₪6",
+                    reason: "זיהיתי כנות פנימית (נדיר)."
+                };
+            } else {
+                const roasts = [
+                    "מעניין איך תמיד אין זמן לדברים שחשובים לך.",
+                    "הסברת יפה. הביצוע פחות.",
+                    "לא 'לא היה זמן'. לא היה סדר עדיפויות.",
+                    "התירוץ הזה עבד בכיתה ג'. פה זה עולה כסף."
+                ];
+                return {
+                    verdict: "BULLSHIT",
+                    roast: roasts[Math.floor(Math.random() * roasts.length)],
+                    fine: "₪15",
+                    reason: "תירוץ גנרי וחלש."
+                };
+            }
+        };
+
+        async function submitExcuse(excuseText) {
+            // Move to judging screen
+            nextScreen(8);
+
+            // Simulate Network/AI Delay
+            setTimeout(() => {
+                const data = localAIJudge(excuseText);
+
+                // Update Verdict Screen
+                document.querySelector('.verdict-tag').textContent = data.verdict;
+                document.querySelector('.roast-text').textContent = `"${data.roast}"`;
+                document.querySelector('.fine-tag').textContent = `קנס: ${data.fine}`;
+                document.querySelector('.verdict-box div:nth-child(3)').textContent = `סיבה: ${data.reason}`;
+
+                // Style based on verdict
+                const box = document.querySelector('.verdict-box');
+                if (data.verdict === 'LEGIT') {
+                    box.style.borderColor = 'var(--success)';
+                    document.querySelector('.verdict-tag').style.color = 'var(--success)';
+                    document.querySelector('.verdict-tag').style.textShadow = '0 0 20px var(--success)';
+                } else {
+                    box.style.borderColor = 'var(--accent)';
+                    document.querySelector('.verdict-tag').style.color = 'var(--accent)';
+                    document.querySelector('.verdict-tag').style.textShadow = '0 0 20px var(--accent)';
+                }
+
+                nextScreen(9);
+            }, 2500); // 2.5 seconds of "Thinking"
+        }
+
+        function nextScreen(num) {
+            document.querySelectorAll('.screen').forEach(s => {
+                s.classList.remove('active');
+            });
+            const next = document.getElementById('screen-' + num);
+            if (!next) return;
+            next.style.display = 'flex';
+            setTimeout(() => {
+                next.classList.add('active');
+            }, 10);
+        }
+    </script>
+</body>
+
+</html>

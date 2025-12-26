@@ -1,0 +1,225 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Outfit:wght@400;700;900&display=swap');
+
+:root {
+  --bg: #050505;
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-border: rgba(255, 255, 255, 0.1);
+  --accent: #FF3B30;
+  --accent-glow: rgba(255, 59, 48, 0.3);
+  --success: #34C759;
+  --text: #FFFFFF;
+  --text-muted: #888888;
+  --glass: rgba(20, 20, 20, 0.7);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--bg);
+  background: radial-gradient(circle at top right, #1a0505, #050505);
+  color: var(--text);
+  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+.app-container {
+  max-width: 500px;
+  margin: 0 auto;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 24px;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom, 30px);
+}
+
+/* --- Typography --- */
+h1 {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+
+.highlight {
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* --- Components --- */
+.btn {
+  padding: 18px 25px;
+  border-radius: 16px;
+  border: none;
+  background: var(--text);
+  color: black;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn-outline {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--surface-border);
+  backdrop-filter: blur(10px);
+}
+
+.input-field {
+  width: 100%;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  color: var(--text);
+  font-size: 16px;
+  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--accent);
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  padding: 5px;
+}
+
+/* --- Cards --- */
+.card {
+  background: var(--glass);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--surface-border);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-overdue {
+  border-color: var(--accent);
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+
+/* --- Header & Logo --- */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  direction: rtl;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+/* --- Hamburger Menu --- */
+.menu-trigger {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 5px;
+  z-index: 100;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100%;
+  background: var(--glass);
+  backdrop-filter: blur(25px);
+  border-left: 1px solid var(--surface-border);
+  z-index: 1001;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
+  border-radius: 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background 0.2s;
+  direction: rtl;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.menu-item.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* --- Animations --- */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-ring {
+  width: 60px;
+  height: 60px;
+  border: 3px solid var(--surface);
+  border-top: 3px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 0px;
+}
