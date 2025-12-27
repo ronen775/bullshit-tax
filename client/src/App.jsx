@@ -89,20 +89,20 @@ const CommitmentCard = ({ item, onFail, onSuccess, onDelete }) => {
     }, [item.deadline]);
 
     return (
-        <motion.div layout className={`card ${isOverdue ? 'card-overdue' : ''}`} style={{ direction: 'rtl', textAlign: 'right' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+        <motion.div layout className={`card ${isOverdue ? 'card-overdue' : ''}`} style={{ direction: 'rtl', textAlign: 'right', padding: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                 <div>
-                    <h3 style={{ fontSize: 20, fontWeight: 900, margin: 0 }}>{item.title}</h3>
-                    <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{new Date(item.deadline).toLocaleTimeString('he-IL')}</p>
+                    <h3 style={{ fontSize: 18, fontWeight: 900, margin: '0 0 4px 0' }}>{item.title}</h3>
+                    <p style={{ fontSize: 11, opacity: 0.5, margin: 0 }}>עד: {new Date(item.deadline).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
-                    <div className="timer-display" style={{ color: isOverdue ? 'var(--accent)' : 'white' }}>{timeLeft}</div>
-                    <button onClick={() => onDelete(item.id)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: 20 }}>🗑️</button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div className="timer-display" style={{ fontSize: 16, fontWeight: 700, color: isOverdue ? 'var(--accent)' : 'var(--success)' }}>{timeLeft}</div>
+                    <button onClick={() => onDelete(item.id)} style={{ background: 'none', border: 'none', padding: 5, fontSize: 16, cursor: 'pointer', opacity: 0.3 }}>🗑️</button>
                 </div>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
-                <Button onClick={() => onSuccess(item.id)} variant="outline" style={{ flex: 1, color: '#34C759', borderColor: '#34C759' }}>בוצע ✓</Button>
-                <Button onClick={() => onFail(item)} variant="outline" style={{ flex: 1, color: isOverdue ? 'var(--accent)' : 'white' }}>נכשלתי ✕</Button>
+                <Button onClick={() => onSuccess(item.id)} variant="outline" style={{ flex: 1.5, color: 'var(--success)', borderColor: 'rgba(52, 199, 89, 0.2)', padding: '12px' }}>בוצע ✓</Button>
+                <Button onClick={() => onFail(item)} variant="outline" style={{ flex: 1, color: isOverdue ? 'var(--accent)' : 'white', padding: '12px', fontSize: 14 }}>נכשלתי ✕</Button>
             </div>
         </motion.div>
     );
@@ -224,23 +224,23 @@ export default function App() {
                 {step === 1 && (
                     <Screen key="1">
                         <Sidebar />
-                        <div className="header-container" style={{ padding: '0 5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', direction: 'rtl' }}>
-                            <button className="menu-trigger" onClick={() => setIsMenuOpen(true)} style={{ fontSize: 24, padding: 5 }}>☰</button>
+                        <div className="header-container" style={{ padding: '0 5px' }}>
+                            <button className="menu-trigger" onClick={() => setIsMenuOpen(true)} style={{ fontSize: 24, padding: 5, background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>☰</button>
 
-                            <div className="card" style={{ padding: '6px 12px', margin: 0, textAlign: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)' }}>
-                                <div style={{ fontSize: 7, opacity: 0.5 }}>SCORE</div>
-                                <div style={{ fontSize: 16, fontWeight: 900, color: data.score > 70 ? 'var(--success)' : 'var(--accent)' }}>{data.score}</div>
+                            <div className="score-badge">
+                                <div className="score-label">SCORE</div>
+                                <div className="score-value" style={{ color: data.score > 70 ? 'var(--success)' : 'var(--accent)' }}>{data.score}</div>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <div style={{ textAlign: 'left' }}>
-                                    <h2 style={{ fontSize: 9, color: 'var(--accent)', fontWeight: 900, margin: 0, letterSpacing: 1.5 }}>NOEXCUSE</h2>
+                                    <h2 style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 900, margin: 0, letterSpacing: 1 }}>NOEXCUSE</h2>
                                 </div>
-                                <img src="/noexcuse_logo.png" className="logo-img" style={{ width: 35, height: 35 }} alt="logo" />
+                                <img src="/noexcuse_logo.png" className="logo-img" alt="logo" />
                             </div>
                         </div>
 
-                        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 20 }}>
+                        <div style={{ flex: 1, paddingBottom: 100 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                                 <span style={{ fontSize: 13, opacity: 0.5 }}>משימות פעילות ({data.commitments?.length || 0})</span>
                                 {data.commitments?.length > 0 && (
