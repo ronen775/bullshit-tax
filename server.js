@@ -15,9 +15,23 @@ app.use(express.json());
 // --- MongoDB Configuration ---
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://ronen_db_user:I31gbV2vnyOGpCT3@cluster0.gejik1g.mongodb.net/noexcuse?retryWrites=true&w=majority";
 
-mongoose.connect(MONGODB_URI)
-    .then(() => console.log('✅ Connected to MongoDB Atlas'))
-    .catch(err => console.error('❌ MongoDB Connection Error:', err));
+let cachedDb = null;
+
+async function connectToDatabase() {
+    if (cachedDb) return cachedDb;
+    console.log('🔗 Connecting to MongoDB...');
+    try {
+        await mongoose.connect(MONGODB_URI, {
+            serverSelectionTimeoutMS: 5000 // Timeout after 5s
+        });
+        cachedDb = mongoose.connection;
+        console.log('✅ Connected to MongoDB Atlas');
+        return cachedDb;
+    } catch (err) {
+        console.error('❌ MongoDB Connection Error:', err);
+        throw err;
+    }
+}
 
 const dbSchema = new mongoose.Schema({
     key: { type: String, default: 'main_data' },
@@ -34,6 +48,7 @@ const Data = mongoose.model('Data', dbSchema);
 
 // Helper to get or create the single data document
 async function getData() {
+    await connectToDatabase();
     let data = await Data.findOne({ key: 'main_data' });
     if (!data) {
         data = new Data({ key: 'main_data' });
@@ -81,35 +96,44 @@ const judgeExcuse = (task, excuse, persona = 'sarcastic') => {
 };
 
 app.get('/api/data', async (req, res) => {
-    const db = await getData();
-    const stats = {
-        bullshitRatio: db.excuses.length ? Math.round((db.excuses.filter(e => e.verdict === 'BULLSHIT').length / db.excuses.length) * 100) : 0,
-        totalFines: db.excuses.reduce((sum, e) => sum + (e.fine || 0), 0)
-    };
-    res.json({
-        commitments: db.commitments,
-        excuses: db.excuses,
-        score: db.score,
-        settings: db.settings,
-        stats
-    });
+    try {
+        const db = await getData();
+        const stats = {
+            bullshitRatio: db.excuses.length ? Math.round((db.excuses.filter(e => e.verdict === 'BULLSHIT').length / db.excuses.length) * 100) : 0,
+            totalFines: db.excuses.reduce((sum, e) => sum + (e.fine || 0), 0)
+        };
+        res.json({
+            commitments: db.commitments,
+            excuses: db.excuses,
+            score: db.score,
+            settings: db.settings,
+            stats
+        });
+    } catch (e) {
+        console.error("Fetch Error:", e);
+        res.status(500).json({ error: "Database not connected", details: e.message });
+    }
 });
 
 app.post('/api/settings', async (req, res) => {
-    const db = await getData();
-    db.settings = { ...db.settings, ...req.body };
-    db.markModified('settings');
-    await db.save();
-    res.json({ success: true });
+    try {
+        const db = await getData();
+        db.settings = { ...db.settings, ...req.body };
+        db.markModified('settings');
+        await db.save();
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/commitments', async (req, res) => {
-    const db = await getData();
-    const newC = { id: Date.now(), title: req.body.title, deadline: req.body.deadline };
-    db.commitments.push(newC);
-    db.markModified('commitments');
-    await db.save();
-    res.json(newC);
+    try {
+        const db = await getData();
+        const newC = { id: Date.now(), title: req.body.title, deadline: req.body.deadline };
+        db.commitments.push(newC);
+        db.markModified('commitments');
+        await db.save();
+        res.json(newC);
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/commitments/done', async (req, res) => {
