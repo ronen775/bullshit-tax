@@ -241,7 +241,7 @@ export default function App() {
                         </div>
 
                         <div style={{ flex: 1, paddingBottom: 100 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, padding: '0 4px' }}>
                                 <span style={{ fontSize: 13, opacity: 0.5 }}>משימות פעילות ({data.commitments?.length || 0})</span>
                                 {data.commitments?.length > 0 && (
                                     <button onClick={async () => {
@@ -249,33 +249,35 @@ export default function App() {
                                             await fetch(`${API_BASE}/api/commitments/clear`, { method: 'POST' });
                                             refreshAction();
                                         }
-                                    }} style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: 12, cursor: 'pointer' }}>מחק הכל</button>
+                                    }} style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: 12, cursor: 'pointer', fontWeight: 700 }}>מחק הכל</button>
                                 )}
                             </div>
-                            {data.commitments?.map(c => (
-                                <CommitmentCard
-                                    key={c.id}
-                                    item={c}
-                                    onFail={(item) => { setActiveTask(item); setStep(3) }}
-                                    onSuccess={submitDone}
-                                    onDelete={async (id) => {
-                                        if (window.confirm("למחוק משימה זו?")) {
-                                            await fetch(`${API_BASE}/api/commitments/delete`, { method: 'POST', body: JSON.stringify({ id }), headers: { 'Content-Type': 'application/json' } });
-                                            refreshAction();
-                                        }
-                                    }}
-                                />
-                            ))}
-                            {data.commitments?.length === 0 && (
-                                <div style={{ textAlign: 'center', marginTop: 100, opacity: 0.3 }}>
-                                    <div style={{ fontSize: 50 }}>🧘‍♂️</div>
-                                    <p>אין משימות. שקט מדי...</p>
-                                </div>
-                            )}
+                            <div style={{ display: 'grid', gap: 12 }}>
+                                {data.commitments?.map(c => (
+                                    <CommitmentCard
+                                        key={c.id} item={c}
+                                        onFail={(task) => { setActiveTask(task); setStep(3); }}
+                                        onSuccess={submitDone}
+                                        onDelete={async (id) => {
+                                            if (window.confirm("למחוק משימה זו?")) {
+                                                await fetch(`${API_BASE}/api/commitments/delete`, { method: 'POST', body: JSON.stringify({ id }), headers: { 'Content-Type': 'application/json' } });
+                                                refreshAction();
+                                            }
+                                        }}
+                                    />
+                                ))}
+                                {data.commitments?.length === 0 && (
+                                    <div style={{ textAlign: 'center', marginTop: 80, opacity: 0.4 }}>
+                                        <div style={{ fontSize: 48, marginBottom: 16 }}>🎯</div>
+                                        <p style={{ fontSize: 16, fontWeight: 700 }}>אין לך משימות פעילות</p>
+                                        <p style={{ fontSize: 13 }}>הגיע הזמן להתחייב למשהו!</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        <div style={{ paddingTop: 15, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                            <Button onClick={() => setStep(2)} style={{ width: '100%', background: 'var(--accent)', color: 'white', fontWeight: 900, padding: 20 }}>+ התחייבות חדשה</Button>
+                        <div style={{ position: 'fixed', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)', left: 20, right: 20, zIndex: 100 }}>
+                            <Button onClick={() => setStep(2)} style={{ width: '100%', height: 60, fontSize: 18, background: 'var(--accent)', color: 'white', borderRadius: 16, boxShadow: '0 10px 30px rgba(255, 59, 48, 0.3)' }}>+ התחייבות חדשה</Button>
                         </div>
                     </Screen>
                 )}
@@ -344,45 +346,52 @@ export default function App() {
 
                 {step === 2 && (
                     <Screen key="2">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, direction: 'rtl' }}>
-                            <h1 style={{ margin: 0 }}>התחייבות</h1>
-                            <Button onClick={() => setStep(1)} variant="outline">חזרה</Button>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: 'rtl' }}>
+                            <h1 style={{ margin: 0, fontSize: 24 }}>התחייבות חדשה</h1>
+                            <Button onClick={() => setStep(1)} variant="outline">ביטול</Button>
                         </div>
-                        <div style={{ direction: 'rtl' }}>
-                            <label style={{ opacity: 0.6, fontSize: 14, display: 'block', marginBottom: 10 }}>מה המשימה?</label>
-                            <input placeholder="למשל: אימון בוקר" className="input-field" value={newTask} onChange={e => setNewTask(e.target.value)} style={{ textAlign: 'right', fontSize: 18 }} />
 
-                            <label style={{ opacity: 0.6, fontSize: 14, display: 'block', margin: '25px 0 10px' }}>מתי הדדליין?</label>
-                            <div style={{ display: 'flex', gap: 10, marginBottom: 15 }}>
-                                <Button variant={mode === 'min' ? 'primary' : 'outline'} onClick={() => setMode('min')} style={{ flex: 1 }}>דקות</Button>
-                                <Button variant={mode === 'date' ? 'primary' : 'outline'} onClick={() => setMode('date')} style={{ flex: 1 }}>תאריך/שעה</Button>
+                        <div className="card" style={{ direction: 'rtl', textAlign: 'right' }}>
+                            <label style={{ fontSize: 12, opacity: 0.6, marginBottom: 8, display: 'block' }}>מה המשימה שלך?</label>
+                            <input autoFocus placeholder="ללכת לחדר כושר, לסיים את הפרויקט..." className="input-field" value={newTask} onChange={e => setNewTask(e.target.value)} style={{ fontSize: 18 }} />
+
+                            <div style={{ marginTop: 24 }}>
+                                <label style={{ fontSize: 12, opacity: 0.6, marginBottom: 12, display: 'block' }}>מתי הדדליין?</label>
+                                <div style={{ display: 'flex', gap: 10, marginBottom: 15 }}>
+                                    <button onClick={() => setMode('min')} style={{ flex: 1, padding: 12, borderRadius: 10, border: 'none', background: mode === 'min' ? 'var(--accent)' : 'rgba(255,255,255,0.05)', color: 'white', fontWeight: 700 }}>דקות</button>
+                                    <button onClick={() => setMode('date')} style={{ flex: 1, padding: 12, borderRadius: 10, border: 'none', background: mode === 'date' ? 'var(--accent)' : 'rgba(255,255,255,0.05)', color: 'white', fontWeight: 700 }}>תאירך ושעה</button>
+                                </div>
+
+                                {mode === 'min' ? (
+                                    <input placeholder="בעוד כמה דקות?" className="input-field" type="number" value={minInput} onChange={e => setMinInput(e.target.value)} style={{ textAlign: 'right', fontSize: 18 }} />
+                                ) : (
+                                    <input
+                                        className="input-field"
+                                        type="datetime-local"
+                                        value={dtInput}
+                                        onChange={e => setDtInput(e.target.value)}
+                                        onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                                        style={{ textAlign: 'right', cursor: 'pointer', fontSize: 16 }}
+                                    />
+                                )}
                             </div>
-                            {mode === 'min' ? (
-                                <input placeholder="בעוד כמה דקות?" className="input-field" type="number" value={minInput} onChange={e => setMinInput(e.target.value)} style={{ textAlign: 'right' }} />
-                            ) : (
-                                <input
-                                    className="input-field"
-                                    type="datetime-local"
-                                    value={dtInput}
-                                    onChange={e => setDtInput(e.target.value)}
-                                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                                    style={{ textAlign: 'right', cursor: 'pointer' }}
-                                />
-                            )}
                         </div>
-                        <Button onClick={handleAddCommitment} style={{ background: 'var(--success)', color: 'white', fontWeight: 900, marginTop: 'auto', padding: 20 }}>אני מתחייב!</Button>
+
+                        <Button onClick={handleAddCommitment} style={{ background: 'var(--success)', color: 'white', fontWeight: 900, marginTop: 20, padding: 20, fontSize: 18 }}>אני מתחייב!</Button>
                     </Screen>
                 )}
 
                 {step === 3 && activeTask && (
                     <Screen key="3">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, direction: 'rtl' }}>
-                            <h1 style={{ margin: 0 }}>למה נכשלת?</h1>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: 'rtl' }}>
+                            <h1 style={{ margin: 0, fontSize: 24 }}>למה נכשלת?</h1>
                             <Button onClick={() => setStep(1)} variant="outline">חזרה</Button>
                         </div>
-                        <p style={{ textAlign: 'right', color: 'var(--accent)', fontSize: 22, fontWeight: 700 }}>{activeTask.title}</p>
-                        <textarea placeholder="כתוב את התירוץ שלך כאן..." className="input-field" value={excuse} onChange={e => setExcuse(e.target.value)} style={{ textAlign: 'right', minHeight: 200, fontSize: 18, marginTop: 20, paddingTop: 15 }} />
-                        <Button onClick={() => submitExcuse(excuse)} style={{ background: 'var(--accent)', color: 'white', marginTop: 'auto', padding: 20, fontSize: 18, fontWeight: 900 }}>שלח לשיפוט ה-AI</Button>
+                        <div className="card" style={{ direction: 'rtl', textAlign: 'right' }}>
+                            <p style={{ color: 'var(--accent)', fontSize: 20, fontWeight: 800, margin: '0 0 15px 0' }}>{activeTask.title}</p>
+                            <textarea placeholder="כתוב את התירוץ שלך כאן... ה-AI יחליט אם זה בולשיט או לגיטימי." className="input-field" value={excuse} onChange={e => setExcuse(e.target.value)} style={{ textAlign: 'right', minHeight: 180, fontSize: 18, paddingTop: 15, lineHeight: 1.5 }} />
+                        </div>
+                        <Button onClick={() => submitExcuse(excuse)} style={{ background: 'var(--accent)', color: 'white', marginTop: 20, padding: 20, fontSize: 18, fontWeight: 900 }}>שלח לשיפוט ה-AI</Button>
                     </Screen>
                 )}
 
@@ -390,60 +399,60 @@ export default function App() {
 
                 {step === 4 && activeTask && (
                     <Screen key="4">
-                        <div style={{ textAlign: 'center', marginTop: 40 }}>
-                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ fontSize: 100, marginBottom: 10 }}>
+                        <div style={{ textAlign: 'center', marginTop: 20 }}>
+                            <motion.div initial={{ scale: 0, rotate: -10 }} animate={{ scale: 1, rotate: 0 }} style={{ fontSize: 80, marginBottom: 10 }}>
                                 {activeTask.personaUsed === 'polish' ? '👵' : (activeTask.personaUsed === 'coach' ? '🏋️' : '🤖')}
                             </motion.div>
-                            <h1 style={{ color: activeTask.verdict === 'BULLSHIT' ? 'var(--accent)' : 'var(--success)', fontSize: 56, fontWeight: 900, margin: 0 }}>{activeTask.verdict}</h1>
-                            <div className="card" style={{ padding: 40, marginTop: 25, background: 'rgba(255,255,255,0.05)', borderRadius: 30 }}>
-                                <p style={{ fontSize: 24, fontStyle: 'italic', lineHeight: 1.5 }}>"{activeTask.roast}"</p>
+                            <h2 style={{ fontSize: 16, opacity: 0.6, margin: 0 }}>גזר הדין:</h2>
+                            <h1 style={{ color: activeTask.verdict === 'BULLSHIT' ? 'var(--accent)' : 'var(--success)', fontSize: 50, fontWeight: 900, margin: '5px 0' }}>{activeTask.verdict}</h1>
+
+                            <div className="card" style={{ padding: 24, marginTop: 20, background: 'rgba(255,255,255,0.03)', borderRadius: 20, borderStyle: 'dashed' }}>
+                                <p style={{ fontSize: 20, fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>"{activeTask.roast}"</p>
                             </div>
-                            <div className="card" style={{ marginTop: 20, padding: '20px 40px', display: 'inline-block' }}>
-                                <div style={{ fontSize: 10, opacity: 0.5 }}>קנס</div>
-                                <div style={{ fontSize: 40, fontWeight: 900 }}>₪{activeTask.fine}</div>
+
+                            <div className="card" style={{ marginTop: 20, padding: '15px 30px', display: 'inline-block' }}>
+                                <div style={{ fontSize: 10, opacity: 0.5, marginBottom: 4 }}>קנס</div>
+                                <div style={{ fontSize: 32, fontWeight: 900 }}>₪{activeTask.fine}</div>
                             </div>
-                            <Button onClick={() => { if (window.currentAudio) window.currentAudio.pause(); setStep(1); }} style={{ marginTop: 40, width: '100%', padding: 20, fontSize: 18 }}>חזרה ללוח בקרה</Button>
+
+                            <Button onClick={() => { if (window.currentAudio) window.currentAudio.pause(); setStep(1); }} style={{ marginTop: 30, width: '100%', padding: 20, fontSize: 18, background: 'var(--text)', color: 'black' }}>חזרה ללוח בקרה</Button>
                         </div>
                     </Screen>
                 )}
 
                 {step === 10 && (
                     <Screen key="10">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, direction: 'rtl' }}>
-                            <h1 style={{ margin: 0 }}>היסטוריה</h1>
-                            <div style={{ display: 'flex', gap: 8 }}>
-                                {data.excuses && data.excuses.length > 0 && (
-                                    <Button onClick={async () => {
-                                        if (window.confirm("למחוק את כל ההיסטוריה?")) {
-                                            try {
-                                                const res = await fetch(`${API_BASE}/api/history/clear`, { method: 'POST' });
-                                                if (res.ok) await refreshAction();
-                                                else alert("שגיאה במחיקה");
-                                            } catch (e) {
-                                                console.error(e);
-                                                alert("שרת לא זמין");
-                                            }
-                                        }
-                                    }} variant="outline" style={{ fontSize: 12, padding: '8px 12px', borderColor: 'rgba(255,59,48,0.3)', color: 'var(--accent)' }}>מחק הכל</Button>
-                                )}
-                                <Button onClick={() => setStep(1)} variant="outline">חזרה</Button>
-                            </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: 'rtl' }}>
+                            <h1 style={{ margin: 0, fontSize: 24 }}>היסטוריה</h1>
+                            <Button onClick={() => setStep(1)} variant="outline">חזרה</Button>
                         </div>
-                        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 100 }}>
-                            {data.excuses?.length === 0 ? <p style={{ textAlign: 'center', opacity: 0.3, marginTop: 50 }}>אין היסטוריה עדיין.</p> : data.excuses?.map(h => (
-                                <div key={h.id || Math.random()} className="card" style={{ padding: 20, borderRight: `6px solid ${h.verdict === 'BULLSHIT' ? 'var(--accent)' : 'var(--success)'}`, textAlign: 'right', marginBottom: 15, background: 'rgba(255,255,255,0.03)' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                        <div style={{ fontWeight: 900, fontSize: 20 }}>{h.task}</div>
-                                        <div style={{ fontSize: 11, padding: '4px 8px', borderRadius: 8, background: h.verdict === 'BULLSHIT' ? 'rgba(255,59,48,0.1)' : 'rgba(52,199,89,0.1)', color: h.verdict === 'BULLSHIT' ? 'var(--accent)' : 'var(--success)', fontWeight: 900 }}>{h.verdict}</div>
+
+                        <div style={{ display: 'grid', gap: 12, paddingBottom: 40 }}>
+                            {data.excuses?.map(ex => (
+                                <div key={ex.id} className="card" style={{ direction: 'rtl', textAlign: 'right', padding: 16 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, alignItems: 'center' }}>
+                                        <span style={{ fontWeight: 900, color: ex.verdict === 'BULLSHIT' ? 'var(--accent)' : 'var(--success)', fontSize: 14 }}>{ex.verdict}</span>
+                                        <span style={{ fontSize: 11, opacity: 0.4 }}>{new Date(ex.date).toLocaleDateString('he-IL')}</span>
                                     </div>
-                                    <div style={{ fontSize: 15, opacity: 0.8, margin: '10px 0', lineHeight: 1.4 }}>"{h.excuse}"</div>
-                                    <p style={{ fontSize: 14, color: 'var(--accent)', fontWeight: 700, margin: '5px 0' }}>{h.roast}</p>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: 0.4, marginTop: 15, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 10 }}>
-                                        <span>₪{h.fine} קנס</span>
-                                        <span>{new Date(h.date).toLocaleDateString('he-IL')} | {new Date(h.date).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</span>
-                                    </div>
+                                    <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>{ex.task}</div>
+                                    <div style={{ fontSize: 13, opacity: 0.6, fontStyle: 'italic', background: 'rgba(255,255,255,0.02)', padding: 10, borderRadius: 8 }}>"{ex.roast}"</div>
                                 </div>
                             ))}
+                            {data.excuses?.length === 0 && (
+                                <div style={{ textAlign: 'center', marginTop: 100, opacity: 0.3 }}>אין היסטוריה עדיין. תתחיל להתחייב (או לפשל).</div>
+                            )}
+                            {data.excuses?.length > 0 && (
+                                <Button onClick={async () => {
+                                    if (window.confirm("למחוק את כל ההיסטוריה?")) {
+                                        try {
+                                            const res = await fetch(`${API_BASE}/api/history/clear`, { method: 'POST' });
+                                            if (res.ok) await refreshAction();
+                                        } catch (e) {
+                                            console.error(e);
+                                        }
+                                    }
+                                }} variant="outline" style={{ marginTop: 20, color: 'var(--accent)', borderColor: 'rgba(255, 59, 48, 0.2)' }}>🗑️ נקה היסטוריה</Button>
+                            )}
                         </div>
                     </Screen>
                 )}
