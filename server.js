@@ -3,6 +3,8 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
+const mongoose = require('mongoose');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -10,28 +12,35 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-const DB_FILE = path.join(__dirname, 'db.json');
-const getInitialDB = () => ({
-    commitments: [],
-    excuses: [],
-    score: 100,
-    settings: { persona: 'sarcastic', voiceGender: 'female' }
+// --- MongoDB Configuration ---
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://ronen_db_user:I31gbV2vnyOGpCT3@cluster0.gejik1g.mongodb.net/noexcuse?retryWrites=true&w=majority";
+
+mongoose.connect(MONGODB_URI)
+    .then(() => console.log('✅ Connected to MongoDB Atlas'))
+    .catch(err => console.error('❌ MongoDB Connection Error:', err));
+
+const dbSchema = new mongoose.Schema({
+    key: { type: String, default: 'main_data' },
+    commitments: { type: Array, default: [] },
+    excuses: { type: Array, default: [] },
+    score: { type: Number, default: 100 },
+    settings: {
+        persona: { type: String, default: 'sarcastic' },
+        voiceGender: { type: String, default: 'female' }
+    }
 });
 
-const readDB = () => {
-    try {
-        if (!fs.existsSync(DB_FILE)) return getInitialDB();
-        const content = fs.readFileSync(DB_FILE, 'utf8');
-        const data = JSON.parse(content);
-        if (!data.settings) data.settings = { persona: 'sarcastic', voiceGender: 'female' };
-        if (!data.commitments) data.commitments = [];
-        if (!data.excuses) data.excuses = [];
-        if (data.score === undefined) data.score = 100;
-        return data;
-    } catch (e) { return getInitialDB(); }
-};
+const Data = mongoose.model('Data', dbSchema);
 
-const writeDB = (data) => fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+// Helper to get or create the single data document
+async function getData() {
+    let data = await Data.findOne({ key: 'main_data' });
+    if (!data) {
+        data = new Data({ key: 'main_data' });
+        await data.save();
+    }
+    return data;
+}
 
 // --- TTS Proxy ---
 app.get('/api/tts', async (req, res) => {
@@ -71,36 +80,45 @@ const judgeExcuse = (task, excuse, persona = 'sarcastic') => {
     };
 };
 
-app.get('/api/data', (req, res) => {
-    const db = readDB();
+app.get('/api/data', async (req, res) => {
+    const db = await getData();
     const stats = {
         bullshitRatio: db.excuses.length ? Math.round((db.excuses.filter(e => e.verdict === 'BULLSHIT').length / db.excuses.length) * 100) : 0,
         totalFines: db.excuses.reduce((sum, e) => sum + (e.fine || 0), 0)
     };
-    res.json({ ...db, stats });
+    res.json({
+        commitments: db.commitments,
+        excuses: db.excuses,
+        score: db.score,
+        settings: db.settings,
+        stats
+    });
 });
 
-app.post('/api/settings', (req, res) => {
-    const db = readDB();
+app.post('/api/settings', async (req, res) => {
+    const db = await getData();
     db.settings = { ...db.settings, ...req.body };
-    writeDB(db);
+    db.markModified('settings');
+    await db.save();
     res.json({ success: true });
 });
 
-app.post('/api/commitments', (req, res) => {
-    const db = readDB();
+app.post('/api/commitments', async (req, res) => {
+    const db = await getData();
     const newC = { id: Date.now(), title: req.body.title, deadline: req.body.deadline };
     db.commitments.push(newC);
-    writeDB(db);
+    db.markModified('commitments');
+    await db.save();
     res.json(newC);
 });
 
-app.post('/api/commitments/done', (req, res) => {
-    const db = readDB();
+app.post('/api/commitments/done', async (req, res) => {
+    const db = await getData();
     const persona = db.settings.persona || 'sarcastic';
     db.commitments = db.commitments.filter(c => c.id !== req.body.id);
     db.score = Math.min(100, (db.score || 100) + 10);
-    writeDB(db);
+    db.markModified('commitments');
+    await db.save();
 
     const cheers = {
         polish: ["נו שויין, לפחות פעם אחת עשית משהו כמו שצריך.", "הצלחת! אולי עוד יצא ממך משהו.", "בסדר, בסדר, אל תשתחצן."],
@@ -113,38 +131,39 @@ app.post('/api/commitments/done', (req, res) => {
     res.json({ success: true, newScore: db.score, cheer, persona });
 });
 
-// מחיקת משימה בודדת
-app.post('/api/commitments/delete', (req, res) => {
-    const db = readDB();
+app.post('/api/commitments/delete', async (req, res) => {
+    const db = await getData();
     db.commitments = db.commitments.filter(c => c.id !== req.body.id);
-    writeDB(db);
+    db.markModified('commitments');
+    await db.save();
     res.json({ success: true });
 });
 
-// מחיקת כל המשימות
-app.post('/api/commitments/clear', (req, res) => {
-    const db = readDB();
+app.post('/api/commitments/clear', async (req, res) => {
+    const db = await getData();
     db.commitments = [];
-    writeDB(db);
+    db.markModified('commitments');
+    await db.save();
     res.json({ success: true });
 });
 
-// מחיקת היסטוריה
-app.post('/api/history/clear', (req, res) => {
-    console.log("🧹 Clearing history (keeping score)...");
-    const db = readDB();
+app.post('/api/history/clear', async (req, res) => {
+    const db = await getData();
     db.excuses = [];
-    writeDB(db);
+    db.markModified('excuses');
+    await db.save();
     res.json({ success: true });
 });
 
-app.post('/api/judge', (req, res) => {
-    const db = readDB();
+app.post('/api/judge', async (req, res) => {
+    const db = await getData();
     const result = judgeExcuse(req.body.task, req.body.excuse, db.settings.persona);
     if (req.body.id) db.commitments = db.commitments.filter(c => c.id !== req.body.id);
     db.score = Math.max(0, Math.min(100, (db.score || 100) + result.scoreChange));
     db.excuses.unshift({ ...result, task: req.body.task, excuse: req.body.excuse, date: new Date(), id: Date.now() });
-    writeDB(db);
+    db.markModified('commitments');
+    db.markModified('excuses');
+    await db.save();
     res.json(result);
 });
 
@@ -159,6 +178,6 @@ if (fs.existsSync(clientDist)) {
     });
 }
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 NOEXCUSE SERVER on port ${PORT}`));
+const server = app.listen(PORT, '0.0.0.0', () => console.log(`🚀 NOEXCUSE SERVER on port ${PORT}`));
 
 module.exports = app;
